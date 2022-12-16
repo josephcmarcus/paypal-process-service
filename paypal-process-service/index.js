@@ -1,7 +1,7 @@
 ﻿const df = require("durable-functions");
 
 module.exports = df.orchestrator(function* (context) {
-  const paypalToken = yield context.df.callActivity("obtainAccessToken", null)
-
+  const paypalToken = yield context.df.callActivity("getAccessToken", null)
+  
   return paypalToken;
 });
