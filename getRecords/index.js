@@ -1,3 +1,5 @@
-﻿module.exports = async function (context) {
-    return `Hello ${context.bindings.name}!`;
+﻿const database = require('../database')
+
+module.exports = async function (context) {
+    return await database.getRecords();
 };
