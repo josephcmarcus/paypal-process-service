@@ -1,14 +1,25 @@
-﻿/*
- * This function is not intended to be invoked directly. Instead it will be
- * triggered by an orchestrator function.
- * 
- * Before running this sample, please:
- * - create a Durable orchestration function
- * - create a Durable HTTP starter function
- * - run 'npm install durable-functions' from the wwwroot folder of your
- *   function app in Kudu
- */
+﻿const dotenv = require("dotenv").config();
+const axios = require("axios");
 
 module.exports = async function (context) {
-    return `Hello ${context.bindings.name}!`;
+  context.log("Attempting to obtain access token from PayPal");
+
+  const response = await axios({
+    method: "post",
+    url: "https://api.sandbox.paypal.com/v1/oauth2/token",
+    data: "grant_type=client_credentials",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Accept-Language": "en_US",
+    },
+    auth: {
+      username: process.env.PAYPAL_CLIENT_ID,
+      password: process.env.PAYPAL_CLIENT_SECRET,
+    },
+  });
+
+  context.log("Successfully obtained access token from PayPal");
+  
+  return response.data.access_token;
 };
