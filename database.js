@@ -31,11 +31,9 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-const table = process.env.DB_TABLE;
-
 const promisePool = pool.promise();
 
-module.exports.getRecords = async function () {
+module.exports.getRecords = async function (table) {
   // query the database using pooled connection
   const [rows] = await promisePool.query(`SELECT * FROM ${table}`);
   return rows;
