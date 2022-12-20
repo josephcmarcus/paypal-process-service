@@ -6,7 +6,7 @@ module.exports = async function (context) {
 
   const response = await axios({
     method: "post",
-    url: "https://api.sandbox.paypal.com/v1/oauth2/token",
+    url: `${process.env.PAYPAL_BASE_URL}/v1/oauth2/token`,
     data: "grant_type=client_credentials",
     headers: {
       Accept: "application/json",
