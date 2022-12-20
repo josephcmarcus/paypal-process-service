@@ -1,6 +1,6 @@
-require("dotenv").config();
-const mysql = require("mysql2");
-const fs = require("fs");
+require('dotenv').config();
+const mysql = require('mysql2');
+const fs = require('fs');
 
 // create the connection to the database without using pool
 // const connection = await mysql.createConnection({
@@ -37,4 +37,20 @@ module.exports.getRecords = async function (table) {
   // query the database using pooled connection
   const [rows] = await promisePool.query(`SELECT * FROM ${table}`);
   return rows;
+};
+
+module.exports.updateRecord = async function (table, column, record, values) {
+  const sql = `UPDATE ${table} SET ${column} = ? WHERE ${record} = ?`;
+  const response = await promisePool.execute(
+    sql,
+    values,
+    function (err, results, fields) {
+      if (err) {
+        context.log('There was an error updating the database record:', err);
+        return err;
+      }
+      return results;
+    }
+  );
+  return response;
 };
