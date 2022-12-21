@@ -9,6 +9,6 @@ module.exports = df.orchestrator(function* (context) {
   inputs.push(paypalToken, records);
   const results = yield context.df.callActivity('processRecords', inputs);
 
-  outputs.push(paypalToken, records, results);
+  outputs.push(records, results);
   return outputs;
 });
