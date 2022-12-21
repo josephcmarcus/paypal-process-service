@@ -1,5 +1,6 @@
 ﻿const database = require('../database');
 const axios = require('axios');
+const dotenv = require("dotenv").config();
 
 const table = process.env.DB_TEST_TABLE; // change this back to the production table
 
@@ -16,7 +17,7 @@ module.exports = async function (context) {
       // send capture call to Paypal API
       const response = await axios({
         method: 'post',
-        url: 'http://localhost:3000/paypal', // change this back to Paypal's API url
+        url: `${process.env.PAYPAL_BASE_URL}/v2/checkout/orders`,
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/x-www-form-urlencoded',
