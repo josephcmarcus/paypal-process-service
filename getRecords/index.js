@@ -7,7 +7,7 @@ module.exports = async function (context) {
         context.log('Received records from database')
         return await database.getRecords(table);
     } catch (err) {
-        context.log(`Error obtained records from database: ${err}`)
+        context.log(`Error obtaining records from database: ${err}`)
     }
     const table = process.env.DB_TEST_TABLE;
     return await database.getRecords(table);

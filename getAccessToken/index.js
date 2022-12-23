@@ -21,8 +21,7 @@ module.exports = async function (context) {
       password: process.env.PAYPAL_SECRET,
     },
   });
-  
-  console.log('here is the paypal access token from getAccessToken', response.data.access_token)
+
   context.log('Successfully obtained access token from PayPal');
 
   return response.data.access_token;

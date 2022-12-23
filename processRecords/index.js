@@ -11,7 +11,6 @@ module.exports = async function (context) {
   const records = context.bindings.args[1];
   const recordsReceived = records.length;
   let recordsProcessed = 0;
-  console.log('Here is the paypalToken:', paypalToken);
 
   // loop through records array and process each against the Paypal API
   for (const record of records) {
@@ -27,7 +26,7 @@ module.exports = async function (context) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${paypalToken}`,
           'PayPal-Request-Id': paypalRequestId,
-          Prefer: 'return=representation'
+          Prefer: 'return=representation',
         },
         data: {
           intent: 'CAPTURE',
@@ -60,7 +59,10 @@ module.exports = async function (context) {
       );
       try {
         // update the processed column with a timestamp for each record in the database
-        const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        const date = new Date()
+          .toISOString()
+          .replace(/T/, ' ')
+          .replace(/\..+/, '');
         await database.updateRecord(table, 'Processed', 'Billing_Agreement', [
           date,
           record.Billing_Agreement,
