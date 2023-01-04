@@ -34,8 +34,3 @@ module.exports = df.orchestrator(function* (context) {
   outputs.push(records, results);
   return outputs;
 });
-
-
-// update getRecords with new SQL logic to only pull records without a process date
-// update processRecords to write new SQL date value for each record processed
-// add better context logging to processRecords
