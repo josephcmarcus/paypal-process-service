@@ -35,7 +35,7 @@ const promisePool = pool.promise();
 
 module.exports.getRecords = async function (table) {
   // query the database using pooled connection
-  const [rows] = await promisePool.query(`SELECT * FROM ${table}`);
+  const [rows] = await promisePool.query(`SELECT * FROM ${table} where Processed_Date is null`);
   return rows;
 };
 
