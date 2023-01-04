@@ -5,8 +5,6 @@ module.exports = async function (context) {
   const { instanceId } = context.bindingData.args;
 
   try {
-    context.log(`Starting getAccessToken Paypal API query for instance = '${instanceId}'.`);
-    
     const response = await axios({
       method: 'post',
       url: `${process.env.PAYPAL_BASE_URL}/v1/oauth2/token`,
