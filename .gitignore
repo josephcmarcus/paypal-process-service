@@ -103,3 +103,4 @@ __azurite_db*__.json
 
 # test files
 test.*
+processRecordsTest
