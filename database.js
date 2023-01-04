@@ -39,8 +39,8 @@ module.exports.getRecords = async function (table) {
   return rows;
 };
 
-module.exports.updateRecord = async function (table, column, record, values) {
-  const sql = `UPDATE ${table} SET ${column} = ? WHERE ${record} = ?`;
+module.exports.updateRecord = async function (table, column, billingAgreement, stagingId, values) {
+  const sql = `UPDATE ${table} SET ${column} = ? WHERE ${billingAgreement} = ? AND ${stagingId} = ?`;
   const response = await promisePool.execute(
     sql,
     values,

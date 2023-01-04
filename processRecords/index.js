@@ -6,18 +6,28 @@ const dotenv = require('dotenv').config();
 const table = process.env.DB_TEST_TABLE; // change this back to the production table
 
 module.exports = async function (context) {
-  // return await database.updateRecord(table, 'Processed', 'Billing_Agreement', [1, 'B-456TEST']);
-  const paypalToken = context.bindings.args[0];
-  const records = context.bindings.args[1];
+  // Return await database.updateRecord(table, 'Processed', 'Billing_Agreement', [1, 'B-456TEST']);
+
+  // Obtain the paypalToken, records, and instanceId from the context argument
+  const { paypalToken, records, instanceId } = context.bindingData.args;
+  // Set recordsReceived to the number of records in the records array
   const recordsReceived = records.length;
+  // Set recordsProcessed counter to 0 to increment as records are processed
   let recordsProcessed = 0;
 
-  // loop through records array and process each against the Paypal API
+  context.log(
+    `Starting processRecords Paypal API query loop for instance = '${instanceId}'.`
+  );
+
+  // Loop through records array and process each against the Paypal API
   for (const record of records) {
     try {
-      // generate uuid string to pass to PayPal-Request-Id header
+      context.log(
+        `Executing processRecords for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = '${instanceId}'.`
+      );
+      // Generate uuid string to pass to PayPal-Request-Id header
       const paypalRequestId = uuidv4();
-      // send capture call to Paypal API
+      // Send capture call to Paypal API
       const response = await axios({
         method: 'post',
         url: `${process.env.PAYPAL_BASE_URL}/v2/checkout/orders`,
@@ -38,7 +48,7 @@ module.exports = async function (context) {
           },
           purchase_units: [
             {
-              reference_id: `${record.PPStagingID}`,
+              invoice_id: `${record.PPStagingID}`,
               amount: {
                 currency_code: 'USD',
                 value: `${record.Amount}`,
@@ -55,7 +65,7 @@ module.exports = async function (context) {
         },
       });
       context.log(
-        `Response from Paypal for ${record.Billing_Agreement} / ${record.PPStagingID}: ${response.status}`
+        `Response from Paypal for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = ${instanceId}: ${response.status}`
       );
       try {
         // update the processed column with a timestamp for each record in the database
@@ -63,24 +73,28 @@ module.exports = async function (context) {
           .toISOString()
           .replace(/T/, ' ')
           .replace(/\..+/, '');
-        await database.updateRecord(table, 'Processed', 'Billing_Agreement', [
+        await database.updateRecord(table, 'Processed_Date', 'Billing_Agreement', 'PPStagingID', [
           date,
           record.Billing_Agreement,
+          record.PPStagingID,
         ]);
       } catch (err) {
         context.log(
-          `Error updating database record ${record.Billing_Agreement} / ${record.PPStagingID}: ${err}`
+          `processRecords failed to update database for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = '${instanceId}'. ${err}`
         );
       }
       // increment the number of records processed for logging purposes
       recordsProcessed++;
+
+      context.log(
+        `processRecords succeeded to update database for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = '${instanceId}'. ${err}`
+      );
     } catch (err) {
       context.log(
-        `Error from Paypal for record ${record.Billing_Agreement} / ${record.PPStagingID}: ${err}`
+        `processRecords failed for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = '${instanceId}'. ${err}`
       );
     }
   }
-  const results = `Records received: ${recordsReceived}. Records processed: ${recordsProcessed}`;
-  context.log(results);
+  const results = `processRecords succeeded. Records received: ${recordsReceived}. Records processed: ${recordsProcessed}`;
   return results;
 };
