@@ -2,14 +2,18 @@
 const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
 const dotenv = require('dotenv').config();
+const getDateTime = require('../utils/getDateTime');
 
 const table = process.env.DB_TEST_TABLE; // change this back to the production table
 
 module.exports = async function (context) {
-
   const { paypalToken, records, instanceId } = context.bindingData.args;
-  const recordsReceived = records.length;
-  let recordsProcessed = 0;
+
+  const results = {
+    recordsReceived: records.length,
+    recordsProcessed: 0,
+    errors: [],
+  };
 
   for (const record of records) {
     try {
@@ -19,7 +23,7 @@ module.exports = async function (context) {
 
       // Generate uuid string to pass to PayPal-Request-Id header as this is required by the API
       const paypalRequestId = uuidv4();
-      
+
       // Send capture call to Paypal API
       const response = await axios({
         method: 'post',
@@ -62,15 +66,15 @@ module.exports = async function (context) {
       );
       try {
         // update the processed column in the mysql db with a timestamp
-        const date = new Date()
-          .toISOString()
-          .replace(/T/, ' ')
-          .replace(/\..+/, '');
-        await database.updateRecord(table, 'Processed_Date', 'Billing_Agreement', 'PPStagingID', [
-          date,
-          record.Billing_Agreement,
-          record.PPStagingID,
-        ]);
+        const date = getDateTime();
+        
+        await database.updateRecord(
+          table,
+          'Processed_Date',
+          'Billing_Agreement',
+          'PPStagingID',
+          [date, record.Billing_Agreement, record.PPStagingID]
+        );
         context.log(
           `processRecords succeeded to update database for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = '${instanceId}'.`
         );
@@ -79,18 +83,28 @@ module.exports = async function (context) {
           `processRecords failed to update database for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = '${instanceId}'. ${err}`
         );
       }
-      
-      recordsProcessed++;
+
+      results.recordsProcessed++;
 
       context.log(
         `processRecords succeeded to update database for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = '${instanceId}'. ${err}`
       );
     } catch (err) {
+      const error = {
+        Billing_Agreement: record.Billing_Agreement,
+        PPStagingID: record.PPStagingID,
+        instanceId: instanceId,
+        error: err,
+      }
+      results.errors.push(error);
       context.log(
         `processRecords failed for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = '${instanceId}'. ${err}`
       );
     }
   }
-  const results = `processRecords finished. Records received: ${recordsReceived}. Records processed: ${recordsProcessed}`;
+  context.log(
+    `processRecords finished. Records received: ${results.recordsReceived}. Records processed: ${results.recordsProcessed}. Errors: ${results.errors.length}`
+  );
+
   return results;
 };
