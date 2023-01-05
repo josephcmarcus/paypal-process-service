@@ -13,7 +13,8 @@ module.exports = df.orchestrator(function* (context) {
     const message = `Could not process records for ID = '${activityPayload.instanceId}'. An error occurred in the getAccessToken function.`;
     context.log(message)
     return message;
-  }
+  };
+
   activityPayload.paypalToken = paypalToken;
 
   const records = yield context.df.callActivity('getRecords', activityPayload);
@@ -25,7 +26,8 @@ module.exports = df.orchestrator(function* (context) {
       const message = `No valid records to process for ID = '${activityPayload.instanceId}'. Exiting function.`;
       context.log(message);
       return message;
-  }
+  };
+  
   activityPayload.records = records;
 
   // change processRecordsTest back to processRecords when finished testing

@@ -6,27 +6,20 @@ const dotenv = require('dotenv').config();
 const table = process.env.DB_TEST_TABLE; // change this back to the production table
 
 module.exports = async function (context) {
-  // Return await database.updateRecord(table, 'Processed', 'Billing_Agreement', [1, 'B-456TEST']);
 
-  // Obtain the paypalToken, records, and instanceId from the context argument
   const { paypalToken, records, instanceId } = context.bindingData.args;
-  // Set recordsReceived to the number of records in the records array
   const recordsReceived = records.length;
-  // Set recordsProcessed counter to 0 to increment as records are processed
   let recordsProcessed = 0;
 
-  context.log(
-    `Starting processRecords Paypal API query loop for instance = '${instanceId}'.`
-  );
-
-  // Loop through records array and process each against the Paypal API
   for (const record of records) {
     try {
       context.log(
         `Executing processRecords for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = '${instanceId}'.`
       );
-      // Generate uuid string to pass to PayPal-Request-Id header
+
+      // Generate uuid string to pass to PayPal-Request-Id header as this is required by the API
       const paypalRequestId = uuidv4();
+      
       // Send capture call to Paypal API
       const response = await axios({
         method: 'post',
@@ -65,10 +58,10 @@ module.exports = async function (context) {
         },
       });
       context.log(
-        `Response from Paypal for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = ${instanceId}: ${response.status}`
+        `processRecords succeeded for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = ${instanceId}: ${response.status}`
       );
       try {
-        // update the processed column with a timestamp for each record in the database
+        // update the processed column in the mysql db with a timestamp
         const date = new Date()
           .toISOString()
           .replace(/T/, ' ')
@@ -78,12 +71,15 @@ module.exports = async function (context) {
           record.Billing_Agreement,
           record.PPStagingID,
         ]);
+        context.log(
+          `processRecords succeeded to update database for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = '${instanceId}'.`
+        );
       } catch (err) {
         context.log(
           `processRecords failed to update database for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = '${instanceId}'. ${err}`
         );
       }
-      // increment the number of records processed for logging purposes
+      
       recordsProcessed++;
 
       context.log(
@@ -95,6 +91,6 @@ module.exports = async function (context) {
       );
     }
   }
-  const results = `processRecords succeeded. Records received: ${recordsReceived}. Records processed: ${recordsProcessed}`;
+  const results = `processRecords finished. Records received: ${recordsReceived}. Records processed: ${recordsProcessed}`;
   return results;
 };
