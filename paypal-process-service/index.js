@@ -5,8 +5,10 @@ module.exports = df.orchestrator(function* (context) {
     instanceId: context.df.instanceId,
     paypalToken: '',
     records: [],
+    errors: [],
   };
   const outputs = [];
+  let errors;
 
   const paypalToken = yield context.df.callActivity('getAccessToken', activityPayload);
   if (paypalToken === null) {
@@ -31,8 +33,13 @@ module.exports = df.orchestrator(function* (context) {
   activityPayload.records = records;
 
   // change processRecordsTest back to processRecords when finished testing
-  const results = yield context.df.callActivity('processRecordsTest', activityPayload);
+  const results = yield context.df.callActivity('processRecords', activityPayload);
+  if (results.errors.length !== 0) {
+    activityPayload.errors = results.errors
+    errors = yield context.df.callActivity('writeErrors', activityPayload);
+  };
 
-  outputs.push(records, results);
+  outputs.push(records, results, errors);
+
   return outputs;
 });
