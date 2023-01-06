@@ -67,7 +67,7 @@ module.exports = async function (context) {
       try {
         // update the processed column in the mysql db with a timestamp
         const date = getDateTime();
-        
+
         await database.updateRecord(
           table,
           'Processed_Date',
@@ -86,20 +86,41 @@ module.exports = async function (context) {
 
       results.recordsProcessed++;
 
-      context.log(
-        `processRecords succeeded to update database for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = '${instanceId}'. ${err}`
-      );
     } catch (err) {
+      const date = getDateTime();
       const error = {
         Billing_Agreement: record.Billing_Agreement,
         PPStagingID: record.PPStagingID,
         instanceId: instanceId,
         error: err,
+        date: date,
       }
+
       results.errors.push(error);
+
       context.log(
         `processRecords failed for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = '${instanceId}'. ${err}`
       );
+
+      try {
+        // update the processed column in the mysql db with a timestamp
+        const date = getDateTime();
+        
+        await database.updateRecord(
+          table,
+          'Processed_Date',
+          'Billing_Agreement',
+          'PPStagingID',
+          [date, record.Billing_Agreement, record.PPStagingID]
+        );
+        context.log(
+          `processRecords succeeded to update database for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = '${instanceId}'.`
+        );
+      } catch (err) {
+        context.log(
+          `processRecords failed to update database for ${record.Billing_Agreement} / ${record.PPStagingID} of instance = '${instanceId}'. ${err}`
+        );
+      }
     }
   }
   context.log(
