@@ -65,7 +65,7 @@ module.exports.updateRecord = async function (
 
 module.exports.writeErrors = async function (table, columns, values) {
   const sql = `INSERT INTO ${table} (${columns}) VALUES ?`;
-  const response = await promisePool.execute(
+  const response = await promisePool.query(
     sql,
     [values],
     function (err, results, fields) {
