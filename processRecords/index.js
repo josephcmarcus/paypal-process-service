@@ -92,7 +92,8 @@ module.exports = async function (context) {
         Billing_Agreement: record.Billing_Agreement,
         PPStagingID: record.PPStagingID,
         instanceId: instanceId,
-        error: err,
+        error: err.message,
+        trace: err.stack,
         date: date,
       }
 
