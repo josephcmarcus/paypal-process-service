@@ -10,15 +10,6 @@ module.exports = df.orchestrator(function* (context) {
   const outputs = [];
   let errors;
 
-  const paypalToken = yield context.df.callActivity('getAccessToken', activityPayload);
-  if (paypalToken === null) {
-    const message = `Could not process records for ID = '${activityPayload.instanceId}'. An error occurred in the getAccessToken function.`;
-    context.log(message)
-    return message;
-  };
-
-  activityPayload.paypalToken = paypalToken;
-
   const records = yield context.df.callActivity('getRecords', activityPayload);
   if (records === null) {
     const message = `Could not process records for ID = '${activityPayload.instanceId}'. An error occurred in the getRecords function.`;
@@ -31,6 +22,15 @@ module.exports = df.orchestrator(function* (context) {
   };
   
   activityPayload.records = records;
+
+  const paypalToken = yield context.df.callActivity('getAccessToken', activityPayload);
+  if (paypalToken === null) {
+    const message = `Could not process records for ID = '${activityPayload.instanceId}'. An error occurred in the getAccessToken function.`;
+    context.log(message)
+    return message;
+  };
+
+  activityPayload.paypalToken = paypalToken;
 
   // change processRecordsTest back to processRecords when finished testing
   const results = yield context.df.callActivity('processRecords', activityPayload);
