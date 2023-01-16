@@ -4,8 +4,6 @@ module.exports = async function (context) {
     const { instanceId } = context.bindingData.args;
 
     try {
-        context.log(`Starting getRecords database query for instance = '${instanceId}'.`);
-
         const table = process.env.DB_TEST_TABLE;
         const records = await database.getRecords(table);
 
