@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const dotenv = require('dotenv').config();
 const getDateTime = require('../utils/getDateTime');
 
-const table = process.env.DB_TEST_TABLE; // change this back to the production table
+const table = process.env.DB_PROCESS_TABLE;
 
 module.exports = async function (context) {
   const { paypalToken, records, instanceId } = context.bindingData.args;
