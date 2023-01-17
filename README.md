@@ -3,16 +3,16 @@
 This Azure Durable Function retrieves and processes a daily batch of recurring payments with billing agreement IDs using the PayPal API. The process is outlined as follows:
 
 1. getRecords: Checks database to see if any records are available to process for the day.
-  * If valid records exist, return them to the activityPayload object and move to next step.
-  * If no valid records exist, end the process after execution.
+    * If valid records exist, return them to the activityPayload object and move to next step.
+    * If no valid records exist, end the process after execution.
 
 2. getAccessToken: Queries the PayPal API to obtain a bearer token and return it to the activityPayload object.
-  * This step is necessary because PayPal requires an active bearer token to be passed for each API query.
+    * This step is necessary because PayPal requires an active bearer token to be passed for each API query.
 
 3. processRecords: Queries the PayPal API for each record stored in the records array in the activityPayload object.
-  * Insert current date/time into database for each record after processing.
-  * If errors occur, store them in the errors array in the results object (which is eventually returned to the activityPayload object) and move to next step.
-  * If no errors occur, end the process after execution.
+    * Insert current date/time into database for each record after processing.
+    * If errors occur, store them in the errors array in the results object (which is eventually returned to the activityPayload object) and move to next step.
+    * If no errors occur, end the process after execution.
 
 4. writeErrors: Writes errors from the errors array in the activityPayload object to the database.
 
