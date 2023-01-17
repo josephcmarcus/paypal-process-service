@@ -18,7 +18,7 @@ const pool = mysql.createPool({
 const promisePool = pool.promise();
 
 module.exports.getRecords = async function (table) {
-  // query the database using pooled connection
+  // returns an array of records matching the sql query, or an empty array if no records are found
   const [rows] = await promisePool.query(
     `SELECT * FROM ${table} where Processed_Date is null`
   );
@@ -32,6 +32,7 @@ module.exports.updateRecord = async function (
   stagingId,
   values
 ) {
+  // updates a column for an existing record in the database
   const sql = `UPDATE ${table} SET ${column} = ? WHERE ${billingAgreement} = ? AND ${stagingId} = ?`;
   const response = await promisePool.execute(
     sql,
@@ -48,6 +49,7 @@ module.exports.updateRecord = async function (
 };
 
 module.exports.writeErrors = async function (table, columns, values) {
+  // writes an array of errors to the database
   const sql = `INSERT INTO ${table} (${columns}) VALUES ?`;
   const response = await promisePool.query(
     sql,
