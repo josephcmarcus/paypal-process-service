@@ -16,12 +16,6 @@ This Azure Durable Function retrieves and processes a daily batch of recurring p
 
 4. writeErrors: Writes errors from the errors array in the activityPayload object to the database.
 
-## Setup
-
-* Rename ".env.placeholder" to ".env" and update placeholder values with your own.
-* Depending on your database table structure, you may need to adjust the database functions in the database.js file as well as the database function invocations and table references in getRecords, processRecords, and writeErrors.
-* If you are a first-timer to Microsoft durable functions, it is highly recommended to reference Microsoft's durable function documentation to better understand how they work: <https://learn.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-overview?tabs=javascript>
-
 ## Key Dependencies
 
 * axios to send API queries: <https://github.com/axios/axios>
